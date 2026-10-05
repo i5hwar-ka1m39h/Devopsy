@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-go-app
+spec:
+  containers:
+    - name: my-go-app
+      image: host.minikube.internal:5000/my-go-image:latest
+      ports:
+        - containerPort: 5002

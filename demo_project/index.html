@@ -1,0 +1,74 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080b14">
+  <title>Orbit Console — 3D UI</title>
+  <style>
+    :root { color-scheme: dark; --bg:#080b14; --panel:rgba(19,24,40,.72); --line:rgba(255,255,255,.11); --muted:#8f9ab5; --text:#f5f7ff; --cyan:#6ee7f9; --violet:#9b8cff; --pink:#f783c9; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; overflow-x:hidden; color:var(--text); font:14px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background:radial-gradient(circle at 18% 12%, #172c4d 0, transparent 34%), radial-gradient(circle at 83% 26%, #2b1749 0, transparent 33%), var(--bg); }
+    body::before { content:""; position:fixed; inset:0; pointer-events:none; opacity:.22; background-image:linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px); background-size:48px 48px; mask-image:linear-gradient(to bottom, #000, transparent 80%); }
+    .shell { width:min(1180px, calc(100% - 40px)); margin:auto; padding:28px 0 48px; }
+    header { display:flex; justify-content:space-between; align-items:center; gap:20px; margin-bottom:48px; }
+    .brand { display:flex; align-items:center; gap:12px; letter-spacing:.14em; font-size:12px; font-weight:800; text-transform:uppercase; }
+    .brand-mark { display:grid; place-items:center; width:34px; height:34px; border:1px solid rgba(110,231,249,.55); border-radius:11px; color:var(--cyan); box-shadow:0 0 26px rgba(110,231,249,.2), inset 0 0 16px rgba(110,231,249,.12); transform:rotate(45deg); }
+    .brand-mark span { transform:rotate(-45deg); font-size:16px; }
+    nav { display:flex; align-items:center; gap:8px; }
+    nav a, .ghost { color:var(--muted); text-decoration:none; padding:9px 13px; border:1px solid transparent; border-radius:10px; }
+    nav a:hover, .ghost:hover { border-color:var(--line); color:var(--text); background:rgba(255,255,255,.04); }
+    .status { display:flex; align-items:center; gap:7px; color:#b4f8d3; font-size:12px; }
+    .status i { width:7px; height:7px; border-radius:50%; background:#61e7a8; box-shadow:0 0 14px #61e7a8; }
+    .hero { display:grid; grid-template-columns:1.05fr .95fr; align-items:center; gap:52px; min-height:500px; }
+    .eyebrow { color:var(--cyan); letter-spacing:.2em; font-size:11px; font-weight:800; text-transform:uppercase; }
+    h1 { max-width:630px; margin:14px 0 20px; font-size:clamp(48px, 7vw, 82px); line-height:.96; letter-spacing:-.07em; font-weight:750; }
+    h1 span { color:transparent; background:linear-gradient(110deg, var(--cyan), var(--violet) 55%, var(--pink)); background-clip:text; }
+    .intro { max-width:510px; margin:0 0 30px; color:var(--muted); font-size:17px; }
+    .actions { display:flex; flex-wrap:wrap; gap:10px; }
+    button { border:0; border-radius:11px; padding:12px 17px; color:#08101a; font:700 13px inherit; cursor:pointer; background:linear-gradient(110deg, var(--cyan), #b5f2ff); box-shadow:0 10px 28px rgba(110,231,249,.18); }
+    button:hover { transform:translateY(-2px); box-shadow:0 12px 34px rgba(110,231,249,.3); }
+    .ghost { background:transparent; color:var(--text); cursor:pointer; font-weight:600; }
+    .stage { min-height:445px; display:grid; place-items:center; perspective:1100px; }
+    .scene { position:relative; width:min(390px, 76vw); aspect-ratio:1; transform-style:preserve-3d; animation:float 7s ease-in-out infinite; }
+    .orb { position:absolute; inset:19%; border-radius:50%; background:radial-gradient(circle at 32% 24%, #fff 0 2%, var(--cyan) 5%, #3c55ac 31%, #171331 68%); box-shadow:0 0 30px #6ee7f9, 0 0 90px rgba(110,231,249,.34), inset -25px -30px 50px #080816; transform:translateZ(26px); }
+    .orb::after { content:""; position:absolute; inset:12%; border:1px solid rgba(255,255,255,.5); border-radius:50%; opacity:.35; }
+    .ring { position:absolute; inset:7%; border:1px solid rgba(110,231,249,.6); border-radius:50%; transform:rotateX(67deg) rotateZ(-18deg); box-shadow:0 0 20px rgba(110,231,249,.18); }
+    .ring:nth-child(2) { inset:14%; transform:rotateY(69deg) rotateZ(26deg); border-color:rgba(247,131,201,.65); }
+    .ring:nth-child(3) { inset:1%; transform:rotateX(76deg) rotateY(28deg) rotateZ(42deg); border-color:rgba(155,140,255,.45); }
+    .satellite { position:absolute; width:48px; height:48px; right:3%; top:11%; display:grid; place-items:center; border:1px solid rgba(255,255,255,.35); border-radius:14px; background:linear-gradient(145deg, rgba(255,255,255,.18), rgba(255,255,255,.03)); box-shadow:0 15px 30px rgba(0,0,0,.3); transform:translateZ(95px) rotate(12deg); color:var(--pink); font-size:20px; }
+    .hud { position:absolute; left:0; bottom:7%; width:180px; padding:14px; border:1px solid var(--line); border-radius:16px; background:rgba(12,17,30,.76); backdrop-filter:blur(18px); transform:translateZ(75px) rotateY(10deg) rotateZ(-4deg); box-shadow:0 20px 40px rgba(0,0,0,.28); }
+    .hud small { color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:.12em; }
+    .metric { display:flex; justify-content:space-between; align-items:end; margin-top:7px; } .metric strong { font-size:27px; } .up { color:#77efb2; font-size:11px; }
+    .bar { height:4px; margin-top:12px; border-radius:9px; background:rgba(255,255,255,.1); overflow:hidden; } .bar i { display:block; width:72%; height:100%; border-radius:inherit; background:linear-gradient(90deg,var(--cyan),var(--violet)); }
+    .ticker { display:flex; justify-content:space-between; gap:18px; padding:18px 20px; border-top:1px solid var(--line); border-bottom:1px solid var(--line); color:var(--muted); font-size:12px; }
+    .ticker b { color:var(--text); font-weight:600; }
+    @keyframes float { 0%,100% { transform:translateY(0) rotateX(1deg) rotateY(-3deg); } 50% { transform:translateY(-14px) rotateX(-2deg) rotateY(3deg); } }
+    @media (max-width:760px) { .shell { width:min(100% - 28px, 560px); padding-top:18px; } header { margin-bottom:28px; } nav a { display:none; } .hero { grid-template-columns:1fr; gap:4px; } .stage { min-height:365px; order:-1; } h1 { font-size:56px; } .intro { font-size:15px; } .ticker { display:grid; grid-template-columns:1fr 1fr; } }
+    @media (prefers-reduced-motion:reduce) { *, *::before, *::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div class="brand"><div class="brand-mark" aria-hidden="true"><span>✦</span></div><span>Orbit / 03</span></div>
+      <nav aria-label="Main navigation"><a href="#signal">Signal</a><a href="#system">System</a><span class="status"><i aria-hidden="true"></i>All systems live</span></nav>
+    </header>
+    <section class="hero" id="signal">
+      <div class="copy">
+        <div class="eyebrow">Spatial interface / 2026</div>
+        <h1>Shape the <span>signal.</span></h1>
+        <p class="intro">A tactile command surface for teams building at the edge of the possible. Move through your next idea in three dimensions.</p>
+        <div class="actions"><button type="button" onclick="this.textContent='Signal connected'">Initialize signal</button><a class="ghost" href="#system">Explore system ↗</a></div>
+      </div>
+      <div class="stage" aria-label="Animated 3D orb visualization">
+        <div class="scene"><div class="orb"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="satellite" aria-hidden="true">+</div><div class="hud"><small>Core temperature</small><div class="metric"><strong>72.4°</strong><span class="up">+8.2%</span></div><div class="bar"><i></i></div></div></div>
+      </div>
+    </section>
+    <section class="ticker" id="system" aria-label="System stats"><span><b>01</b> / Adaptive geometry</span><span><b>02</b> / Live telemetry</span><span><b>03</b> / Zero gravity mode</span><span><b>04</b> / Built for wonder</span></section>
+  </main>
+</body>
+</html>
+
+<!-- Open this standalone file at /fancy-3d-ui.html in the Next.js preview. -->
